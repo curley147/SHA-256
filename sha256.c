@@ -133,9 +133,13 @@ uint32_t SIG1(uint32_t x){
 	return (rotr(6,x) ^ rotr(11,x) ^ rotr(25,x));
 }
 // See section 4.1.2 for definitions
+// Ch (Choose) is a function that wherever the bits in x are 1 it picks out the corresponding bits in y
+// and wherever the bits in x are 0 it picks out the corresponding bits in z and then does an XOR on it
 uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){
 	return ((x & y) ^ ((!x) & z));
-}
+
+// Maj (Majority) is a function that wherever the majority value from bits x,y,z is 1, the output is 1 and 
+// wherever the the majority value from bits x,y,z is 0, the output is 0.
 uint32_t Maj(uint32_t x, uint32_t y, uint32_t z){
 	return ((x & y) ^ (x & z) ^ (y & z));
 }
