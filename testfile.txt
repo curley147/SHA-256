@@ -1,5 +1,1 @@
-Android Development
-\paragraph{}In this section, we will be discussing the Android application we developed for this project. The application was for the end-user to view artifact descriptions when the app detected an artifact in the museum. We also had a developer app for production use while we were testing the application. The following subsections are in chronological order in terms of development, where we go through all the different aspects of the Android development process in detail.
-
-Environment
-\paragraph{}The software used to develop the Android application were the Java Development Kit 8 (JDK8) and Android Studio 3.3. We downloaded and installed the JDK from Oracle's Java website(https://www.oracle.com/technetwork/java/javase/downloads/index.html) and 
+tttttttttttttttttttt 

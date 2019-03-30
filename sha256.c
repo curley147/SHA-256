@@ -6,6 +6,8 @@
 #include<stdio.h>
 // header file for fixed bit-length integers
 #include <stdint.h>
+// header file for using  file error
+#include <stdlib.h>
 
 // unions store member variables in same location(i.e if you store a value in one varible, it affects the other )
 // declaring union message block
@@ -21,23 +23,24 @@ union msgblock{
 enum status {READ, PAD0, PAD1, FINISH};
 
 // See section 4.1.2 for definitions
-uint32_t sig0(uint32_t x);
-uint32_t sig1(uint32_t x);
-uint32_t SIG0(uint32_t x);
-uint32_t SIG1(uint32_t x);
-uint32_t Ch(uint32_t x, uint32_t y, uint32_t z);
-uint32_t Maj(uint32_t x, uint32_t y, uint32_t z);
+static inline uint32_t sig0(uint32_t x);
+static inline uint32_t sig1(uint32_t x);
+static inline uint32_t SIG0(uint32_t x);
+static inline uint32_t SIG1(uint32_t x);
+static inline uint32_t Ch(uint32_t x, uint32_t y, uint32_t z);
+static inline uint32_t Maj(uint32_t x, uint32_t y, uint32_t z);
 
 // See section 3.2 for definitions
-uint32_t rotr(uint32_t n, uint32_t x);
-uint32_t shr(uint32_t n, uint32_t x);
+static inline uint32_t rotr(uint32_t n, uint32_t x);
+static inline uint32_t shr(uint32_t n, uint32_t x);
 // Retrieves the next message block
 int nextmsgblock(FILE *file, union msgblock *M, enum status *S, uint64_t *nobits);
 
 // calculates the SHA-256 of a file
 void sha256(FILE *file);
 
-
+// converts bit order from little endian to big endian
+uint8_t convertLtoB(uint8_t value);
 
 int main(int argc, char *argv[]){
 
@@ -45,6 +48,11 @@ int main(int argc, char *argv[]){
 	FILE* file;
 	// read first argument on command line as file name
 	file = fopen(argv[1], "r");
+	// file error handling
+	if (file == NULL) {
+		perror(argv[1]);
+		exit(EXIT_FAILURE);
+	}
 	// run secure hash algorithm on the file
 	sha256(file);
 
@@ -139,38 +147,37 @@ void sha256(FILE *file){
 // e.g static inline uint32_T rotr(uint32_t n, uint32_t x){
 
 // See section 3.2 for definitions
-uint32_t rotr(uint32_t n, uint32_t x){
+static inline uint32_t rotr(uint32_t n, uint32_t x){
 	return (x >> n) | (x << (32-n));
 }
-uint32_t shr(uint32_t n, uint32_t x){
+static inline uint32_t shr(uint32_t n, uint32_t x){
 	return (x >> n);
 }
-
-uint32_t sig0(uint32_t x){
+static inline uint32_t sig0(uint32_t x){
 	// See Sections 3.2 and 4.1.2 for definitions
 	return (rotr(7, x) ^ rotr(18, x) ^ shr(3, x));
 }
-uint32_t sig1(uint32_t x){
+static inline uint32_t sig1(uint32_t x){
 	// See Sections 3.2 and 4.1.2 for definitions
 	return (rotr(17, x) ^ rotr(19, x) ^ shr(10, x));
 
 }
 // See section 4.1.2 for definitions
-uint32_t SIG0(uint32_t x){
+static inline uint32_t SIG0(uint32_t x){
 	return (rotr(2,x) ^ rotr(13,x) ^ rotr(22,x));
 }
-uint32_t SIG1(uint32_t x){
+static inline uint32_t SIG1(uint32_t x){
 	return (rotr(6,x) ^ rotr(11,x) ^ rotr(25,x));
 }
 // See section 4.1.2 for definitions
 // Ch (Choose) is a function that wherever the bits in x are 1 it picks out the corresponding bits in y
 // and wherever the bits in x are 0 it picks out the corresponding bits in z and then does an XOR on it
-uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){
+static inline uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){
 	return ((x & y) ^ ((!x) & z));
 }
 // Maj (Majority) is a function that wherever the majority value from bits x,y,z is 1, the output is 1 and 
 // wherever the the majority value from bits x,y,z is 0, the output is 0.
-uint32_t Maj(uint32_t x, uint32_t y, uint32_t z){
+static inline uint32_t Maj(uint32_t x, uint32_t y, uint32_t z){
 	return ((x & y) ^ (x & z) ^ (y & z));
 }
 // function to return next message block
@@ -239,4 +246,3 @@ int nextmsgblock(FILE *file, union msgblock *M, enum status *S, uint64_t *nobits
 	// return 1 so this function is called again
 	return 1;
 }
-
