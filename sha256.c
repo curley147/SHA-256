@@ -9,6 +9,13 @@
 // header file for using  file error
 #include <stdlib.h>
 
+#define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
+#define SWAP_UINT64(val) \
+( (((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) | \
+    (((val) >> 24) & 0x0000000000FF0000) | (((val) >>  8) & 0x00000000FF000000) | \
+      (((val) <<  8) & 0x000000FF00000000) | (((val) << 24) & 0x0000FF0000000000) | \
+        (((val) << 40) & 0x00FF000000000000) | (((val) << 56) & 0xFF00000000000000) )
+
 // unions store member variables in same location(i.e if you store a value in one varible, it affects the other )
 // declaring union message block
 union msgblock{
@@ -27,7 +34,7 @@ static inline uint32_t sig0(uint32_t x);
 static inline uint32_t sig1(uint32_t x);
 static inline uint32_t SIG0(uint32_t x);
 static inline uint32_t SIG1(uint32_t x);
-static inline uint32_t Ch(uint32_t x, uint32_t y, uint32_t z);
+static inline uint32_t Ch(uint32_t x, uiint32_t y, uint32_t z);
 static inline uint32_t Maj(uint32_t x, uint32_t y, uint32_t z);
 
 // See section 3.2 for definitions
@@ -46,18 +53,24 @@ int main(int argc, char *argv[]){
 
 	// declaring file pointer	
 	FILE* file;
+
+	if(argc < 2) {
+		printf("Enter file first\n");	
+		exit(EXIT_FAILURE);
+	}
 	// read first argument on command line as file name
 	file = fopen(argv[1], "r");
 	// file error handling
 	if (file == NULL) {
 		perror(argv[1]);
 		exit(EXIT_FAILURE);
-	}
-	// run secure hash algorithm on the file
-	sha256(file);
+	}else{
+		// run secure hash algorithm on the file
+		sha256(file);
 
-	// close file
-	fclose(file);
+		// close file
+		fclose(file);
+	}
 	
 	return 0;
 
@@ -109,7 +122,7 @@ void sha256(FILE *file){
 	while(nextmsgblock(file, &M, &S, &nobits)){
 		// from page 22. W[t] = M[t] for 0<=t<=15
 		for(t=0; t<16;	t++)
-			W[t]=M.t[t];
+			W[t] = SWAP_UINT32(M.t[t]);
 		// from page 22. W[t] = ...
 		for(t=16; t<64; t++)
 			W[t] = sig1(W[t-2])+W[t-7]+sig0(W[t-15])+W[t-16];
@@ -173,7 +186,7 @@ static inline uint32_t SIG1(uint32_t x){
 // Ch (Choose) is a function that wherever the bits in x are 1 it picks out the corresponding bits in y
 // and wherever the bits in x are 0 it picks out the corresponding bits in z and then does an XOR on it
 static inline uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){
-	return ((x & y) ^ ((!x) & z));
+	return ((x & y) ^ ((~x) & z));
 }
 // Maj (Majority) is a function that wherever the majority value from bits x,y,z is 1, the output is 1 and 
 // wherever the the majority value from bits x,y,z is 0, the output is 0.
@@ -225,7 +238,7 @@ int nextmsgblock(FILE *file, union msgblock *M, enum status *S, uint64_t *nobits
 			M->e[nobytes] = 0x00;
 		}
 		// setting 64 bit integer to indicate size of actual message
-		M->s[7] = *nobits;
+		M->s[7] = SWAP_UINT64(*nobits);
 		// set flag to finish
 		*S = FINISH;
 	} else if(nobytes < 64){ // not enough room in rest of block to pad
