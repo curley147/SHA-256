@@ -9,6 +9,8 @@ Running the code
 
 To run the code in this repository, the files must first be compiled so you will need a C compiler installed on your machine. Once that is installed, the code can be compiled and run by following these steps. We assume you are using the command line.
 
+This program has to convert the order of bytes from little endian to big endian which means reversing the order of bits in the message.
+
 Clone this repository using Git.
 > git clone https://github.com/curley147/SHA-256.git
 Change into the folder.
@@ -18,3 +20,6 @@ Compile the first file with the following command.
 Run the executable produced followed by file name (I used testfile.txt as an example).
 > ./sha256 testfile.txt
 The program should output 8 64-bit integers in hexadecimal format
+
+
+
