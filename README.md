@@ -24,5 +24,6 @@ The program should output 8 64-bit integers in hexadecimal format
 References
 
 Endian conversion - "https://stackoverflow.com/questions/2182002/convert-big-endian-to-little-endian-in-c-without-using-provided-func"
+
 Inline functions - "https://www.geeksforgeeks.org/inline-function-in-c/"
 
