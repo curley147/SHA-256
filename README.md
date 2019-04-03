@@ -21,5 +21,8 @@ Run the executable produced followed by file name (I used testfile.txt as an exa
 > ./sha256 testfile.txt
 The program should output 8 64-bit integers in hexadecimal format
 
+References
 
+Endian conversion - "https://stackoverflow.com/questions/2182002/convert-big-endian-to-little-endian-in-c-without-using-provided-func"
+Inline functions - "https://www.geeksforgeeks.org/inline-function-in-c/"
 
